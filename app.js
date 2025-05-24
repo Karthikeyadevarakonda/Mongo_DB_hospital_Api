@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import Locations from './Models/LocationModel.js'
+import cors from 'cors'
 
 const app = express();
 dotenv.config();
@@ -10,6 +11,7 @@ const PORT = 3000;
 
 
 app.use(express.json())
+app.use(cors())
 
 mongoose.connect(process.env.MONGO_URI)
  .then(()=>console.log("CONNECTED TO DB"))
