@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import Locations from './Models/LocationModel.js'
 import cors from 'cors'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 dotenv.config();
@@ -10,8 +12,13 @@ dotenv.config();
 const PORT = 3000;
 
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(express.json())
 app.use(cors())
+
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
 mongoose.connect(process.env.MONGO_URI)
  .then(()=>console.log("CONNECTED TO DB"))
@@ -49,7 +56,7 @@ app.put('/updateLocation/id/:id',async(req,res)=>{
 
      try{
       const rowsUpdated =  await Locations.findByIdAndUpdate(id,{city,image},{new:true,runValidators:true});
-      if(rowsUpdated.length <= 0){
+      if(!rowsUpdated.length){
          return res.status(400).json({error:'error in Updating'})
       }
       res.status(200).json({message:`Location with Id ${id} has updated`})
@@ -63,7 +70,7 @@ app.delete('/deleteLocation/:id',async(req,res)=>{
     const {id} = req.params;
     try{
         const rowsDeleted = await Locations.findByIdAndDelete(id);
-        if(rowsDeleted.length <= 0){
+        if(!rowsDeleted.length){
            return res.status(400).json({error:'error in deleteing'})
         } 
         res.status(200).json({message:`DELETED LOCATION WITH ID ${id}`})
@@ -88,6 +95,9 @@ app.get('/',(req,res)=>{
     res.status(200).send("SERVER SUCCESSFULLY RUNNING");
 })
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
 
 app.listen(PORT,()=>{
     console.log(`SERVER RUNNING ON THE PORT ${PORT}`);
